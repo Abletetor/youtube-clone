@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { API_KEY, viewsValueConverter } from '../../data.js';
+import { API_KEY, viewsValueConverter } from '../../data';
 import moment from 'moment';
 import './Feed.css';
 
