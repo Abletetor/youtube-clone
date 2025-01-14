@@ -1,0 +1,93 @@
+.sidebar {
+   background: #fff;
+   width: 15%;
+   height: 100vh;
+   /* Full viewport height */
+   position: fixed;
+   /* Stays fixed while scrolling the page */
+   top: 0;
+   /* Aligns to the top */
+   left: 0;
+   /* Ensures it stays on the left */
+   padding-left: 2%;
+   padding-top: 80px;
+
+   /* Enable vertical scrolling */
+   overflow-y: auto;
+}
+
+.shortcut-links img {
+   width: 20px;
+   margin-right: 20px;
+}
+
+.side-link {
+   display: flex;
+   align-items: center;
+   margin-bottom: 20px;
+   width: fit-content;
+   flex-wrap: wrap;
+   cursor: pointer;
+}
+
+.side-link p {
+   font-size: 14px;
+}
+
+hr {
+   border: 0;
+   height: 1px;
+   background: #ccc;
+   width: 85%;
+}
+
+.subscribed-list h3 {
+   font-size: 13px;
+   margin: 20px 0;
+   color: #5a5a5a;
+}
+
+.subscribed-list img {
+   width: 25px;
+   border-radius: 50%;
+   margin-right: 20px;
+}
+
+.small-sidebar {
+   width: 5%;
+}
+
+.small-sidebar p,
+.small-sidebar h3 {
+   display: none;
+}
+
+.small-sidebar hr {
+   width: 50%;
+   margin-bottom: 20px;
+}
+
+.side-link.active img {
+   padding-bottom: 2px;
+   border-bottom: 3px solid #ff0000;
+}
+
+/*  Customize scrollbar appearance */
+.sidebar::-webkit-scrollbar {
+   width: 8px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+   background: #ccc;
+   border-radius: 4px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+   background: #aaa;
+}
+
+@media (max-width: 900px) {
+   .sidebar {
+      display: none;
+   }
+}
