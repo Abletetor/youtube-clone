@@ -3,6 +3,7 @@ import './Video.css';
 import PlayVideo from '../../components/PlayVideo/PlayVideo';
 import Recommended from '../../components/Recommended/Recommended';
 import { useParams } from 'react-router-dom';
+
 export default function Video () {
    const { videoId, categoryId } = useParams();
 

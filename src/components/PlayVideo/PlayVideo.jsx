@@ -7,14 +7,16 @@ import save from '../../assets/save.png';
 import { API_KEY, viewsValueConverter, formatDescription } from '../../data';
 import moment from 'moment';
 import { useParams } from 'react-router-dom';
+import Loader from '../Loader/Loader';
 
 export default function PlayVideo () {
-
    const { videoId } = useParams();
 
    const [apiData, setApiData] = useState(null);
    const [channelData, setChannelData] = useState(null);
-   const [comment, setComment] = useState([]);
+   const [comments, setComments] = useState([]);
+   const [nextPageToken, setNextPageToken] = useState(null);
+   const [loading, setLoading] = useState(false);
    const [showFullDescription, setShowFullDescription] = useState(false);
 
    const toggleDescription = () => {
@@ -30,12 +32,9 @@ export default function PlayVideo () {
          .catch(error => console.log(error));
    };
 
-   // Fetch channel details
+   // Fetch channel details and initial comments
    const fetchOtherData = async () => {
-      if (!apiData?.snippet?.channelId) {
-         console.error("apiData or apiData.snippet.channelId is undefined.");
-         return;
-      }
+      if (!apiData?.snippet?.channelId) return;
 
       try {
          const channelDataUrl = `https://youtube.googleapis.com/youtube/v3/channels?part=snippet%2CcontentDetails%2Cstatistics&id=${apiData.snippet.channelId}&key=${API_KEY}`;
@@ -43,12 +42,28 @@ export default function PlayVideo () {
          const channelData = await channelResponse.json();
          setChannelData(channelData.items[0]);
 
-         const commentUrl = `https://youtube.googleapis.com/youtube/v3/commentThreads?part=snippet%2Creplies&videoId=${videoId}&key=${API_KEY}`;
-         const commentResponse = await fetch(commentUrl);
-         const commentData = await commentResponse.json();
-         setComment(commentData.items);
+         fetchComments(); // Initial fetch of comments
       } catch (error) {
          console.error("Error fetching data:", error);
+      }
+   };
+
+   // Fetch comments
+   const fetchComments = async (pageToken = '') => {
+      if (loading) return;
+      setLoading(true);
+
+      try {
+         const commentUrl = `https://youtube.googleapis.com/youtube/v3/commentThreads?part=snippet%2Creplies&videoId=${videoId}&key=${API_KEY}&pageToken=${pageToken}`;
+         const response = await fetch(commentUrl);
+         const data = await response.json();
+
+         setComments((prev) => [...prev, ...data.items]);
+         setNextPageToken(data.nextPageToken || null);
+      } catch (error) {
+         console.error("Error fetching comments:", error);
+      } finally {
+         setLoading(false);
       }
    };
 
@@ -60,9 +75,32 @@ export default function PlayVideo () {
       if (apiData) fetchOtherData();
    }, [apiData]);
 
+   useEffect(() => {
+      const handleScroll = () => {
+         const container = document.querySelector('.play-video');
+         if (!container) return;
+         const nearBottom =
+            window.innerHeight + document.documentElement.scrollTop >=
+            document.documentElement.offsetHeight - 500;
+
+         if (nearBottom && nextPageToken && !loading) {
+            fetchComments(nextPageToken);
+         }
+      };
+
+      window.addEventListener('scroll', handleScroll);
+      return () => window.removeEventListener('scroll', handleScroll);
+   }, [nextPageToken, loading]);
+
    return (
       <div className='play-video'>
-         <iframe src={ `https://www.youtube.com/embed/${videoId}?autoplay=1` } frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerPolicy="strict-origin-when-cross-origin" allowFullScreen></iframe>
+         <iframe
+            src={ `https://www.youtube.com/embed/${videoId}?autoplay=1` }
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerPolicy="strict-origin-when-cross-origin"
+            allowFullScreen
+         ></iframe>
          <h3>{ apiData ? apiData.snippet.title : "Title Here" }</h3>
          <div className="play-video-info">
             <p>{ apiData ? viewsValueConverter(apiData.statistics.viewCount) : "No" } views &bull; { apiData ? moment(apiData.snippet.publishedAt).fromNow() : "" }</p>
@@ -98,7 +136,7 @@ export default function PlayVideo () {
             </p>
             <hr />
             <h3>{ apiData ? viewsValueConverter(apiData.statistics.commentCount) : 0 } comments</h3>
-            { comment.map((item, index) => (
+            { comments.map((item, index) => (
                <div className="comment" key={ index }>
                   <img src={ item.snippet.topLevelComment.snippet.authorProfileImageUrl } alt="" />
                   <div>
@@ -111,7 +149,7 @@ export default function PlayVideo () {
                   </div>
                </div>
             )) }
-
+            { loading && <Loader /> }
          </div>
       </div>
    );

@@ -42,3 +42,4 @@ export const formatDescription = (description) => {
       </p>
    ));
 };
+
