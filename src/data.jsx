@@ -1,6 +1,5 @@
 // Exporting API key
 export const API_KEY = import.meta.env.VITE_APP_API;
-export const VIDEO_DETAILS_ID = import.meta.VITE_APP_VIDEODETAILS_ID;
 
 // Views value converter
 export const viewsValueConverter = (value) => {
